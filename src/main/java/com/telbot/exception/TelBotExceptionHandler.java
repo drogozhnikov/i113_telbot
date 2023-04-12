@@ -1,0 +1,34 @@
+package com.telbot.exception;
+
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
+@ControllerAdvice
+public class TelBotExceptionHandler extends ResponseEntityExceptionHandler {
+
+    @ExceptionHandler(value = {IllegalArgumentException.class, IllegalStateException.class})
+    protected ResponseEntity<Object> handleConflict(RuntimeException ex, WebRequest request) {
+        String bodyOfResponse = "This should be application specific";
+        return handleExceptionInternal(ex, bodyOfResponse, new HttpHeaders(), HttpStatus.CONFLICT, request);
+    }
+
+    @ExceptionHandler(value = {TelBotException.class})
+    protected ResponseEntity<Object> handleConflict(TelBotException ex, WebRequest request) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.clearContentHeaders();
+        return handleExceptionInternal(ex, ex.getMessage(), headers, ex.getStatus(), request);
+    }
+
+    @ExceptionHandler(value = {TelegramApiException.class})
+    protected ResponseEntity<Object> handleConflict(TelegramApiException ex, WebRequest request) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.clearContentHeaders();
+        return handleExceptionInternal(ex, ex.getMessage(), headers, HttpStatus.BAD_REQUEST, request);
+    }
+}
