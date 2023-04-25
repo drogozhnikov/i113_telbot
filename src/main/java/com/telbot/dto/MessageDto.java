@@ -10,6 +10,7 @@ public class MessageDto {
 
     @NonNull
     private String userName;
+    @NonNull
     private String message;
 
 }
