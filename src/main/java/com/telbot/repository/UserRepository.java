@@ -8,6 +8,7 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<UserEntity, Integer> {
 
     Optional<UserEntity> findUserEntityByUserName(String userName);
+    Optional<UserEntity> findUserEntityByRegUser(String regUser);
 
     void deleteById(int id);
 }

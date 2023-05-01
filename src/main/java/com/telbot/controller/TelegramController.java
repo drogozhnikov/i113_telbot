@@ -1,6 +1,7 @@
 package com.telbot.controller;
 
 import com.telbot.dto.MessageDto;
+import com.telbot.dto.UserDto;
 import com.telbot.service.TelegramService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,6 +20,11 @@ public class TelegramController {
     @PostMapping("/")
     public void sendMessage(@RequestBody MessageDto message) throws TelegramApiException {
         service.sendApiMessage(message);
+    }
+
+    @PostMapping("/register")
+    public void registerUser(@RequestBody UserDto user) {
+        service.registerUser(user);
     }
 
 }

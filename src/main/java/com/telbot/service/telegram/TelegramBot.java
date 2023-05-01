@@ -44,25 +44,23 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     @Override
     public void onRegister() {
-
     }
 
     @Override
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
-            TelegramRequest reques = fillUnit(update.getMessage());
-            service.getResponse(reques);
+            TelegramRequest request = fillUnit(update.getMessage());
+            service.getResponse(request);//TODO fix why service == null
         }
     }
 
     public void sendMessage(TelegramResponse response) throws TelegramApiException {
         SendMessage outMess = new SendMessage();
-//        setKeys(outMess); //TODO Configure how understand wich user users some Api
+//        setKeys(outMess); //TODO Configure how understand wich user uses some Api
         outMess.setChatId(response.getChatId());
         outMess.setText(response.getMessage());
         execute(outMess);
     }
-
 
 
     private TelegramRequest fillUnit(Message inMess) {
