@@ -28,13 +28,16 @@ public class TelegramApiService {
     private TelegramResponse buildResponse(String message, String userName) {
         Optional<UserEntity> entity = repository.findUserEntityByUserName(userName);
         if (entity.isPresent()) {
-            return TelegramResponse.builder()
-                    .message(message)
-                    .chatId(entity.get().getChatId())
-                    .userName(entity.get().getUserName())
-                    .firstName(entity.get().getFirstName())
-                    .lastName(entity.get().getLastName())
-                    .build();
+            if(entity.get().isActive()){
+                return TelegramResponse.builder()
+                        .message(message)
+                        .chatId(entity.get().getChatId())
+                        .userName(entity.get().getUserName())
+                        .firstName(entity.get().getFirstName())
+                        .lastName(entity.get().getLastName())
+                        .build();
+            }
+            throw new TelBotException("User is not active", HttpStatus.NOT_FOUND);
         }
         throw new TelBotException("User have no chat id", HttpStatus.NOT_FOUND);
     }

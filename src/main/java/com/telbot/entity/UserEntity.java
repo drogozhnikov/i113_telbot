@@ -24,5 +24,6 @@ public class UserEntity {
     private String regUser;
     private String firstName;
     private String lastName;
+    private boolean isActive;
 
 }

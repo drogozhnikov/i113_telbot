@@ -19,7 +19,7 @@ public class TelegramService {
 
     private final String HELLO = "Welcome! Let's find you in my user list, so please send me the name of the account you registered as command {/find.username}";
     private final String REGISTERED = "Your status is active";
-    private final String REGISTERED_UNACTIVE = "Your status is not active. use command {/find.username} replace username by panda account name";
+    private final String REGISTERED_UNACTIVE = "You are not active user. I can't shedule you";
     private final String NOTREGISTERED = "You are not registered. please register in panda";
     private final String ERROR = "Sorry something went wrong...";
     private final String NOTFOUND = "Sorry didn't find any registered user with name: ";
@@ -62,6 +62,7 @@ public class TelegramService {
                         .firstName(request.getFirstName())
                         .lastName(request.getLastName())
                         .chatId(request.getChatId())
+                        .isActive(true)
                         .build();
                 repository.save(fillEntity);
             }
@@ -74,7 +75,7 @@ public class TelegramService {
     private String checkStatus(TelegramRequest request){
         Optional<UserEntity> entity = repository.findUserEntityByUserName(request.getUserName());
         if (entity.isPresent()) {
-            if (Objects.equals(entity.get().getRegUser(), "")) {
+            if (!entity.get().isActive()) {
                 return REGISTERED_UNACTIVE;
             }
             return REGISTERED;
