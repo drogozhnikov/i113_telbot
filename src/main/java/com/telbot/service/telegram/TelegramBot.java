@@ -2,6 +2,7 @@ package com.telbot.service.telegram;
 
 import com.telbot.model.TelegramRequest;
 import com.telbot.model.TelegramResponse;
+import com.telbot.service.MessageService;
 import com.telbot.service.TelegramService;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -30,7 +31,12 @@ public class TelegramBot extends TelegramLongPollingBot {
     @Value("${bottoken}")
     private String BOT_TOKEN;
 
+    @Autowired
     private TelegramService service;
+
+    public TelegramBot(TelegramService service){
+        this.service = service;
+    }
 
     @Override
     public String getBotUsername() {
@@ -47,19 +53,26 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
     @Override
-    public void onUpdateReceived(Update update) {
+    public void onUpdateReceived(Update update)  {
         if (update.hasMessage() && update.getMessage().hasText()) {
             TelegramRequest request = fillUnit(update.getMessage());
-            service.getResponse(request);//TODO fix why service == null
+            TelegramResponse response = service.getResponse(request);//TODO fix why service == null
+
+            try {
+                sendMessage(response);
+            } catch (TelegramApiException e) {
+                throw new RuntimeException(e);
+            }
+
         }
     }
 
     public void sendMessage(TelegramResponse response) throws TelegramApiException {
-        SendMessage outMess = new SendMessage();
+            SendMessage outMess = new SendMessage();
 //        setKeys(outMess); //TODO Configure how understand wich user uses some Api
-        outMess.setChatId(response.getChatId());
-        outMess.setText(response.getMessage());
-        execute(outMess);
+            outMess.setChatId(response.getChatId());
+            outMess.setText(response.getMessage());
+            execute(outMess);
     }
 
 

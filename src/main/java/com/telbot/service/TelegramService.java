@@ -1,19 +1,14 @@
 package com.telbot.service;
 
-import com.telbot.dto.MessageDto;
-import com.telbot.dto.UserDto;
 import com.telbot.entity.UserEntity;
-import com.telbot.exception.TelBotException;
+import com.telbot.model.Command;
 import com.telbot.model.TelegramRequest;
 import com.telbot.model.TelegramResponse;
 import com.telbot.repository.UserRepository;
-import com.telbot.service.telegram.TelegramBot;
 import lombok.AllArgsConstructor;
-import org.apache.catalina.User;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @AllArgsConstructor
@@ -21,55 +16,95 @@ import java.util.Optional;
 public class TelegramService {
 
     private UserRepository repository;
-    private TelegramBot bot;
 
-    public void sendApiMessage(MessageDto messageDto) throws TelegramApiException {
-        bot.sendMessage(buildResponse(messageDto.getMessage(), messageDto.getRegUser()));
+    private final String HELLO = "Welcome! Let's find you in my user list, so please send me the name of the account you registered as command {/find.username}";
+    private final String REGISTERED = "Your status is active";
+    private final String REGISTERED_UNACTIVE = "Your status is not active. use command {/find.username} replace username by panda account name";
+    private final String NOTREGISTERED = "You are not registered. please register in panda";
+    private final String ERROR = "Sorry something went wrong...";
+    private final String NOTFOUND = "Sorry didn't find any registered user with name: ";
+    private final String HELP = "try to use commands {/status}";
+
+    public TelegramResponse getResponse(TelegramRequest request) {
+        getCommandAndMessageFromInputText(request);
+            String responseMessage = doCommand(request);
+        return fillResponse(request,responseMessage);    
     }
 
-    public String getResponse(TelegramRequest request) {
-        if(request.getMessage().equals("/start")){
-            return "Welcome! I can't find you in my user list, so please enter the name of the account you registered:";
-        }else{
-            Optional<UserEntity> entity = repository.findUserEntityByRegUser(request.getMessage());
-            if(entity.isPresent()){
-                if(entity.get().getChatId()==null){
-                    UserEntity fillEntity = UserEntity.builder()
-                            .id(entity.get().getId())
-                            .regUser(entity.get().getRegUser())
-                            .userName(request.getUserName())
-                            .firstName(request.getFirstName())
-                            .lastName(request.getLastName())
-                            .chatId(request.getChatId())
-                            .build();
-                    repository.save(fillEntity);
-                }
-                return "Your status is active";
-            }else{
-                return "Sorry something went wrong";
+    private String doCommand(TelegramRequest request){
+        switch (request.getCommand()){
+            case START:{
+                return HELLO;
+            }
+            case FIND:{
+                return findOrRegisterTelegramUser(request);
+            }
+            case STATUS: {
+                return checkStatus(request);
+            }
+            case HELP:{
+                return this.HELP;
+            }
+            default: {
+                return ERROR;
             }
         }
     }
 
-    private TelegramResponse buildResponse(String message, String userName) {
-        Optional<UserEntity> entity = repository.findUserEntityByUserName(userName);
+    public String findOrRegisterTelegramUser(TelegramRequest request){
+        Optional<UserEntity> entity = repository.findUserEntityByRegUser(request.getMessage());
         if (entity.isPresent()) {
-            return TelegramResponse.builder()
-                    .message(message)
-                    .chatId(entity.get().getChatId())
-                    .userName(entity.get().getUserName())
-                    .firstName(entity.get().getFirstName())
-                    .lastName(entity.get().getLastName())
-                    .build();
+            if (entity.get().getChatId() == null) {
+                UserEntity fillEntity = UserEntity.builder()
+                        .id(entity.get().getId())
+                        .regUser(entity.get().getRegUser())
+                        .userName(request.getUserName())
+                        .firstName(request.getFirstName())
+                        .lastName(request.getLastName())
+                        .chatId(request.getChatId())
+                        .build();
+                repository.save(fillEntity);
+            }
+            return REGISTERED;
+        } else {
+            return NOTFOUND + request.getMessage();
         }
-        throw new TelBotException("User not Exist", HttpStatus.NOT_FOUND);
     }
 
-    public void registerUser(UserDto userDto){
-        UserEntity entity = UserEntity.builder()
-                .regUser(userDto.getRegUser())
+    private String checkStatus(TelegramRequest request){
+        Optional<UserEntity> entity = repository.findUserEntityByUserName(request.getUserName());
+        if (entity.isPresent()) {
+            if (Objects.equals(entity.get().getRegUser(), "")) {
+                return REGISTERED_UNACTIVE;
+            }
+            return REGISTERED;
+        }else{
+            return NOTREGISTERED;
+        }
+    }
+
+    public void getCommandAndMessageFromInputText(TelegramRequest inputRequest) {
+        String tempStrCommand = inputRequest.getMessage();
+        inputRequest.setCommand(Command.HELP);
+        if (inputRequest.getMessage().contains(".")) {
+            String[] tempMass = tempStrCommand.split("\\.");
+            tempStrCommand = tempMass[0];
+            inputRequest.setMessage(tempMass[1]);
+        }
+        try {
+            inputRequest.setCommand(Command.valueOf(tempStrCommand.replace("/", "").toUpperCase()));
+        } catch (IllegalArgumentException ignored) {
+        } //TODO specify does it normal or not
+    }
+    
+    private TelegramResponse fillResponse(TelegramRequest request, String message){
+        return TelegramResponse.builder()
+                .chatId(request.getChatId())
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .userName(request.getUserName())
+                .message(message)
                 .build();
-        repository.save(entity);
     }
 
 }

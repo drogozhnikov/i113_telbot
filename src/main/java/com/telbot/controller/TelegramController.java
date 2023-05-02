@@ -2,7 +2,7 @@ package com.telbot.controller;
 
 import com.telbot.dto.MessageDto;
 import com.telbot.dto.UserDto;
-import com.telbot.service.TelegramService;
+import com.telbot.service.TelegramApiService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,7 +15,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 @AllArgsConstructor
 public class TelegramController {
 
-    private TelegramService service;
+    private TelegramApiService service;
 
     @PostMapping("/")
     public void sendMessage(@RequestBody MessageDto message) throws TelegramApiException {

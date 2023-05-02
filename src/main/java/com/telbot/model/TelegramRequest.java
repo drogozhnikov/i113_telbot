@@ -15,5 +15,6 @@ public class TelegramRequest {
     private String message;
     private String firstName;
     private String lastName;
+    private Command command = Command.HELP;
 
 }
