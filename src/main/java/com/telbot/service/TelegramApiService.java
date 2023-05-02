@@ -44,9 +44,11 @@ public class TelegramApiService {
 
     //used by API. Create entity without chat id.
     public void registerUser(UserDto userDto){
-        UserEntity entity = UserEntity.builder()
-                .regUser(userDto.getRegUser())
-                .build();
-        repository.save(entity);
+        if(userDto.getRegUser()!= null){
+            UserEntity entity = UserEntity.builder()
+                    .regUser(userDto.getRegUser())
+                    .build();
+            repository.save(entity);
+        }
     }
 }
