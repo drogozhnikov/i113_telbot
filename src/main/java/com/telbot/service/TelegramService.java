@@ -5,6 +5,7 @@ import com.telbot.model.Command;
 import com.telbot.model.TelegramRequest;
 import com.telbot.model.TelegramResponse;
 import com.telbot.repository.UserRepository;
+import com.telbot.utils.DiseRoller;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -45,10 +46,19 @@ public class TelegramService {
             case HELP:{
                 return this.HELP;
             }
+            case D:{
+                return rollDise(request);
+            }
             default: {
                 return ERROR;
             }
         }
+    }
+
+    private String rollDise(TelegramRequest request){
+        DiseRoller roller = new DiseRoller();
+        String random = roller.roll(Integer.parseInt(request.getMessage()));
+        return "Player: " + request.getUserName() + " rolled: " +request.getCommand()+request.getMessage() + " result: " + random;
     }
 
     public String findOrRegisterTelegramUser(TelegramRequest request){
