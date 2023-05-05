@@ -58,7 +58,7 @@ public class TelegramService {
     private String rollDise(TelegramRequest request){
         DiseRoller roller = new DiseRoller();
         String random = roller.roll(Integer.parseInt(request.getMessage()));
-        return "Player: " + request.getUserName() + " rolled: " +request.getCommand()+request.getMessage() + " result: " + random;
+        return "Player rolled: " +request.getCommand()+request.getMessage() + " result: " + random;
     }
 
     public String findOrRegisterTelegramUser(TelegramRequest request){

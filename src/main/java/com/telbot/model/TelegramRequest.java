@@ -10,7 +10,6 @@ public class TelegramRequest {
 
     @NonNull
     private String chatId;
-    @NonNull
     private String userName;
     private String message;
     private String firstName;
