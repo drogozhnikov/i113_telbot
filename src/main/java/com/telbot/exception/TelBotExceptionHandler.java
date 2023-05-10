@@ -1,5 +1,6 @@
 package com.telbot.exception;
 
+import org.postgresql.util.PSQLException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,11 @@ public class TelBotExceptionHandler extends ResponseEntityExceptionHandler {
         HttpHeaders headers = new HttpHeaders();
         headers.clearContentHeaders();
         return handleExceptionInternal(ex, ex.getMessage(), headers, ex.getStatus(), request);
+    }
+
+    @ExceptionHandler(value = {PSQLException.class})
+    protected ResponseEntity<Object> handleConflict(PSQLException ex, WebRequest request) {
+        return handleExceptionInternal(ex, ex.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 
     @ExceptionHandler(value = {TelegramApiException.class})

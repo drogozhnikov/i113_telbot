@@ -56,7 +56,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     public void onUpdateReceived(Update update)  {
         if (update.hasMessage() && update.getMessage().hasText()) {
             TelegramRequest request = fillUnit(update.getMessage());
-            TelegramResponse response = service.getResponse(request);//TODO fix why service == null
+            TelegramResponse response = service.getResponse(request);
 
             try {
                 sendMessage(response);

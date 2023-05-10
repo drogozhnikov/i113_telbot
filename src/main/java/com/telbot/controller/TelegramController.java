@@ -23,8 +23,8 @@ public class TelegramController {
     }
 
     @PostMapping("/register")
-    public void registerUser(@RequestBody UserDto user) {
-        service.registerUser(user);
+    public UserDto registerUser(@RequestBody UserDto user) {
+        return service.registerUser(user);
     }
 
 }

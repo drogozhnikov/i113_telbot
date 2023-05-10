@@ -6,6 +6,7 @@ import com.telbot.entity.UserEntity;
 import com.telbot.exception.TelBotException;
 import com.telbot.model.TelegramResponse;
 import com.telbot.repository.UserRepository;
+import com.telbot.service.converter.UserConverter;
 import com.telbot.service.telegram.TelegramBot;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,7 @@ import java.util.Optional;
 @Service
 public class TelegramApiService {
 
+    private UserConverter converter;
     private UserRepository repository;
     private TelegramBot bot;
 
@@ -43,12 +45,15 @@ public class TelegramApiService {
     }
 
     //used by API. Create entity without chat id.
-    public void registerUser(UserDto userDto){
+    public UserDto registerUser(UserDto userDto){
         if(userDto.getRegUser()!= null){
-            UserEntity entity = UserEntity.builder()
-                    .regUser(userDto.getRegUser())
-                    .build();
-            repository.save(entity);
+            Optional<UserEntity> user = repository.findUserEntityByRegUser(userDto.getRegUser());
+            if(!user.isPresent()){
+                UserEntity entity = converter.convertToEntity(userDto);
+                return converter.convertToDto(repository.save(entity));
+            }
+            return converter.convertToDto(user.get());
         }
+        return new UserDto();
     }
 }
