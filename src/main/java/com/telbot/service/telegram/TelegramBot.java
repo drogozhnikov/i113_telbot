@@ -2,6 +2,8 @@ package com.telbot.service.telegram;
 
 import com.telbot.model.TelegramRequest;
 import com.telbot.model.TelegramResponse;
+import com.telbot.model.buttons.DiceButtons;
+import com.telbot.model.buttons.TelegramButtons;
 import com.telbot.service.MessageService;
 import com.telbot.service.TelegramService;
 import lombok.AllArgsConstructor;
@@ -56,20 +58,24 @@ public class TelegramBot extends TelegramLongPollingBot {
     public void onUpdateReceived(Update update)  {
         if (update.hasMessage() && update.getMessage().hasText()) {
             TelegramRequest request = fillUnit(update.getMessage());
-            TelegramResponse response = service.getResponse(request);
-
-            try {
-                sendMessage(response);
-            } catch (TelegramApiException e) {
-                throw new RuntimeException(e);
+            List<TelegramResponse> responseList = service.getResponse(request);
+            if(responseList.size()>0){
+                for(TelegramResponse response1: responseList){
+                    try {
+                        sendMessage(response1);
+                    } catch (TelegramApiException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
             }
-
         }
     }
 
     public void sendMessage(TelegramResponse response) throws TelegramApiException {
             SendMessage outMess = new SendMessage();
 //        setKeys(outMess); //TODO Configure how understand wich user uses some Api
+            TelegramButtons buttons = new DiceButtons();
+            buttons.setKeys(outMess);
             outMess.setChatId(response.getChatId());
             outMess.setText(response.getMessage());
             execute(outMess);

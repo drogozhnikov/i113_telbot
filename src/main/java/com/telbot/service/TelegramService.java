@@ -9,7 +9,8 @@ import com.telbot.utils.DiseRoller;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @AllArgsConstructor
@@ -26,42 +27,68 @@ public class TelegramService {
     private final String NOTFOUND = "Sorry didn't find any registered user with name: ";
     private final String HELP = "try to use commands {/status}";
 
-    public TelegramResponse getResponse(TelegramRequest request) {
+    public List<TelegramResponse> getResponse(TelegramRequest request) {
         getCommandAndMessageFromInputText(request);
+        if (request.getCommand().equals(Command.D)) {
+            return rollDise(request);
+        } else {
             String responseMessage = doCommand(request);
-        return fillResponse(request,responseMessage);    
+            List<TelegramResponse> response = new ArrayList<>();
+            response.add(fillResponse(request, responseMessage));
+            return response;
+        }
+
     }
 
-    private String doCommand(TelegramRequest request){
-        switch (request.getCommand()){
-            case START:{
+    private String doCommand(TelegramRequest request) {
+        switch (request.getCommand()) {
+            case START: {
                 return HELLO;
             }
-            case FIND:{
+            case FIND: {
                 return findOrRegisterTelegramUser(request);
             }
             case STATUS: {
                 return checkStatus(request);
             }
-            case HELP:{
+            case HELP: {
                 return this.HELP;
             }
-            case D:{
-                return rollDise(request);
-            }
+//            case D: {
+//                return rollDise(request);
+//            }
             default: {
                 return ERROR;
             }
         }
     }
 
-    private String rollDise(TelegramRequest request){
+    private List<TelegramResponse> rollDise(TelegramRequest request) {
         DiseRoller roller = new DiseRoller();
         String random = roller.roll(Integer.parseInt(request.getMessage()));
-        return "Player rolled: " +request.getCommand()+request.getMessage() + " result: " + random;
+
+        List<UserEntity> users = repository.findAll();
+        Optional<UserEntity> user = repository.findUserEntityByChatId(request.getChatId());
+        List<TelegramResponse> responseUnits = new ArrayList<>();
+        if(user.isPresent()){
+            for (UserEntity entity : users) {
+                if(entity.isActive()){
+                    String responseRandom = "Player: "+ user.get().getRegUser() +" Rolled: " + request.getCommand() + request.getMessage() + " Result: " + random;
+                    TelegramResponse response = TelegramResponse.builder()
+                            .firstName(entity.getFirstName())
+                            .lastName(entity.getLastName())
+                            .userName(entity.getUserName())
+                            .chatId(entity.getChatId())
+                            .message(responseRandom)
+                            .build();
+                    responseUnits.add(response);
+                }
+            }
+        }
+        return responseUnits;
     }
 
-    public String findOrRegisterTelegramUser(TelegramRequest request){
+    public String findOrRegisterTelegramUser(TelegramRequest request) {
         Optional<UserEntity> entity = repository.findUserEntityByRegUser(request.getMessage());
         if (entity.isPresent()) {
             if (entity.get().getChatId() == null) {
@@ -82,14 +109,14 @@ public class TelegramService {
         }
     }
 
-    private String checkStatus(TelegramRequest request){
+    private String checkStatus(TelegramRequest request) {
         Optional<UserEntity> entity = repository.findUserEntityByUserName(request.getUserName());
         if (entity.isPresent()) {
             if (!entity.get().isActive()) {
                 return REGISTERED_UNACTIVE;
             }
             return REGISTERED;
-        }else{
+        } else {
             return NOTREGISTERED;
         }
     }
@@ -107,8 +134,8 @@ public class TelegramService {
         } catch (IllegalArgumentException ignored) {
         } //TODO specify does it normal or not
     }
-    
-    private TelegramResponse fillResponse(TelegramRequest request, String message){
+
+    private TelegramResponse fillResponse(TelegramRequest request, String message) {
         return TelegramResponse.builder()
                 .chatId(request.getChatId())
                 .firstName(request.getFirstName())

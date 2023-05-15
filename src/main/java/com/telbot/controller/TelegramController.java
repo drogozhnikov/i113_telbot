@@ -19,12 +19,12 @@ public class TelegramController {
 
     @PostMapping("/")
     public void sendMessage(@RequestBody MessageDto message) throws TelegramApiException {
-        service.sendApiMessage(message);
+//        service.sendApiMessage(message);
     }
 
-    @PostMapping("/register")
-    public UserDto registerUser(@RequestBody UserDto user) {
-        return service.registerUser(user);
-    }
+//    @PostMapping("/register")
+//    public UserDto registerUser(@RequestBody UserDto user) {
+//        return service.registerUser(user);
+//    }
 
 }
