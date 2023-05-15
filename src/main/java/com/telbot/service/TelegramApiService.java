@@ -19,41 +19,41 @@ import java.util.Optional;
 @Service
 public class TelegramApiService {
 
-    private UserConverter converter;
-    private UserRepository repository;
-    private TelegramBot bot;
-
-    public void sendApiMessage(MessageDto messageDto) throws TelegramApiException {
-        bot.sendMessage(buildResponse(messageDto.getMessage(), messageDto.getRegUser()));
-    }
-
-    private TelegramResponse buildResponse(String message, String userName) {
-        Optional<UserEntity> entity = repository.findUserEntityByUserName(userName);
-        if (entity.isPresent()) {
-            if(entity.get().isActive()){
-                return TelegramResponse.builder()
-                        .message(message)
-                        .chatId(entity.get().getChatId())
-                        .userName(entity.get().getUserName())
-                        .firstName(entity.get().getFirstName())
-                        .lastName(entity.get().getLastName())
-                        .build();
-            }
-            throw new TelBotException("User is not active", HttpStatus.NOT_FOUND);
-        }
-        throw new TelBotException("User have no chat id", HttpStatus.NOT_FOUND);
-    }
-
-    //used by API. Create entity without chat id.
-    public UserDto registerUser(UserDto userDto){
-        if(userDto.getRegUser()!= null){
-            Optional<UserEntity> user = repository.findUserEntityByRegUser(userDto.getRegUser());
-            if(!user.isPresent()){
-                UserEntity entity = converter.convertToEntity(userDto);
-                return converter.convertToDto(repository.save(entity));
-            }
-            return converter.convertToDto(user.get());
-        }
-        return new UserDto();
-    }
+//    private UserConverter converter;
+//    private UserRepository repository;
+//    private TelegramBot bot;
+//
+//    public void sendApiMessage(MessageDto messageDto) throws TelegramApiException {
+//        bot.sendMessage(buildResponse(messageDto.getMessage(), messageDto.getRegUser()));
+//    }
+//
+//    private TelegramResponse buildResponse(String message, String userName) {
+//        Optional<UserEntity> entity = repository.findUserEntityByUserName(userName);
+//        if (entity.isPresent()) {
+//            if(entity.get().isActive()){
+//                return TelegramResponse.builder()
+//                        .message(message)
+//                        .chatId(entity.get().getChatId())
+//                        .userName(entity.get().getUserName())
+//                        .firstName(entity.get().getFirstName())
+//                        .lastName(entity.get().getLastName())
+//                        .build();
+//            }
+//            throw new TelBotException("User is not active", HttpStatus.NOT_FOUND);
+//        }
+//        throw new TelBotException("User have no chat id", HttpStatus.NOT_FOUND);
+//    }
+//
+//    //used by API. Create entity without chat id.
+//    public UserDto registerUser(UserDto userDto){
+//        if(userDto.getRegUser()!= null){
+//            Optional<UserEntity> user = repository.findUserEntityByRegUser(userDto.getRegUser());
+//            if(!user.isPresent()){
+//                UserEntity entity = converter.convertToEntity(userDto);
+//                return converter.convertToDto(repository.save(entity));
+//            }
+//            return converter.convertToDto(user.get());
+//        }
+//        return new UserDto();
+//    }
 }
