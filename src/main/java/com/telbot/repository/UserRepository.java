@@ -9,6 +9,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Integer> {
 
     Optional<UserEntity> findUserEntityByUserName(String userName);
     Optional<UserEntity> findUserEntityByRegUser(String regUser);
+    Optional<UserEntity> findUserEntityByChatId(String chatId);
 
     void deleteById(int id);
 }
