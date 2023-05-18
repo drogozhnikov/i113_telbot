@@ -74,8 +74,6 @@ public class TelegramBot extends TelegramLongPollingBot {
     public void sendMessage(TelegramResponse response) throws TelegramApiException {
             SendMessage outMess = new SendMessage();
 //        setKeys(outMess); //TODO Configure how understand wich user uses some Api
-            TelegramButtons buttons = new DiceButtons();
-            buttons.setKeys(outMess);
             outMess.setChatId(response.getChatId());
             outMess.setText(response.getMessage());
             execute(outMess);

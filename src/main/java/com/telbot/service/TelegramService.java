@@ -29,15 +29,10 @@ public class TelegramService {
 
     public List<TelegramResponse> getResponse(TelegramRequest request) {
         getCommandAndMessageFromInputText(request);
-        if (request.getCommand().equals(Command.D)) {
-            return rollDise(request);
-        } else {
             String responseMessage = doCommand(request);
             List<TelegramResponse> response = new ArrayList<>();
             response.add(fillResponse(request, responseMessage));
             return response;
-        }
-
     }
 
     private String doCommand(TelegramRequest request) {
@@ -54,38 +49,10 @@ public class TelegramService {
             case HELP: {
                 return this.HELP;
             }
-//            case D: {
-//                return rollDise(request);
-//            }
             default: {
                 return ERROR;
             }
         }
-    }
-
-    private List<TelegramResponse> rollDise(TelegramRequest request) {
-        DiseRoller roller = new DiseRoller();
-        String random = roller.roll(Integer.parseInt(request.getMessage()));
-
-        List<UserEntity> users = repository.findAll();
-        Optional<UserEntity> user = repository.findUserEntityByChatId(request.getChatId());
-        List<TelegramResponse> responseUnits = new ArrayList<>();
-        if(user.isPresent()){
-            for (UserEntity entity : users) {
-                if(entity.isActive()){
-                    String responseRandom = "Player: "+ user.get().getRegUser() +" Rolled: " + request.getCommand() + request.getMessage() + " Result: " + random;
-                    TelegramResponse response = TelegramResponse.builder()
-                            .firstName(entity.getFirstName())
-                            .lastName(entity.getLastName())
-                            .userName(entity.getUserName())
-                            .chatId(entity.getChatId())
-                            .message(responseRandom)
-                            .build();
-                    responseUnits.add(response);
-                }
-            }
-        }
-        return responseUnits;
     }
 
     public String findOrRegisterTelegramUser(TelegramRequest request) {
