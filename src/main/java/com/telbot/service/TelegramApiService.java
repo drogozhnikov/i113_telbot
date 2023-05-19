@@ -27,8 +27,8 @@ public class TelegramApiService {
         bot.sendMessage(buildResponse(messageDto.getMessage(), messageDto.getRegUser()));
     }
 
-    private TelegramResponse buildResponse(String message, String userName) {
-        Optional<UserEntity> entity = repository.findUserEntityByUserName(userName);
+    private TelegramResponse buildResponse(String message, String regUser) {
+        Optional<UserEntity> entity = repository.findUserEntityByRegUser(regUser);
         if (entity.isPresent()) {
             if(entity.get().isActive()){
                 return TelegramResponse.builder()
